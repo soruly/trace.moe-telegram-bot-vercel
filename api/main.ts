@@ -2,7 +2,13 @@ import fetch from "node-fetch";
 import { NowRequest, NowResponse } from "@now/node";
 import { Message } from "node-telegram-bot-api";
 
-const { BOT_NAME, TELEGRAM_TOKEN, TRACE_MOE_KEY, ANILIST_API_URL } = process.env;
+const {
+  BOT_NAME,
+  TELEGRAM_TOKEN,
+  TRACE_MOE_KEY = "",
+  ANILIST_API_URL = "https://graphql.anilist.co/",
+  VERCEL_URL,
+} = process.env;
 
 const TELEGRAM_API = "https://api.telegram.org";
 
@@ -169,7 +175,8 @@ const messageIsMute = (message) => {
 const getImageUrlFromPhotoSize = async (PhotoSize) => {
   if (PhotoSize?.file_id) {
     const json = await fetch(
-      `${TELEGRAM_API}/bot${TELEGRAM_TOKEN}/getFile?file_id=${PhotoSize.file_id}`
+      `${TELEGRAM_API}/bot${TELEGRAM_TOKEN}/getFile?file_id=${PhotoSize.file_id}`,
+      { method: "GET" }
     ).then((res) => res.json());
     return json?.result?.file_path
       ? `${TELEGRAM_API}/file/bot${TELEGRAM_TOKEN}/${json.result.file_path}`
@@ -277,7 +284,11 @@ const groupMessageHandler = async (message) => {
 
 module.exports = async (req: NowRequest, res: NowResponse) => {
   if (req.method !== "POST") {
-    return res.status(200).send("ok");
+    const r = await fetch(
+      `${TELEGRAM_API}/bot${TELEGRAM_TOKEN}/setWebhook?url=${VERCEL_URL}/api/main&max_connections=100`,
+      { method: "GET" }
+    ).then((e) => e.json());
+    return res.status(200).send(r);
   }
   const message: Message = req.body?.message;
   if (message?.chat?.type === "private") {
