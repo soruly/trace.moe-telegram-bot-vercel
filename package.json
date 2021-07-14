@@ -1,7 +1,7 @@
 {
   "name": "trace.moe-telegram-bot-vercel",
   "version": "1.0.0",
-  "description": "",
+  "description": "trace.moe Telegram Bot",
   "main": "main.ts",
   "scripts": {
     "format": "prettier --write \"**/*.ts\"",
@@ -19,7 +19,6 @@
   },
   "homepage": "https://github.com/soruly/trace.moe-telegram-bot-vercel#readme",
   "dependencies": {
-    "dotenv": "^10.0.0",
     "node-fetch": "^2.6.1"
   },
   "devDependencies": {

@@ -1,4 +1,3 @@
-import "dotenv/config";
 import fetch from "node-fetch";
 import { NowRequest, NowResponse } from "@now/node";
 import { Message } from "node-telegram-bot-api";
