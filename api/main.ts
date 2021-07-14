@@ -1,12 +1,13 @@
 import "dotenv/config";
 import fetch from "node-fetch";
 import { NowRequest, NowResponse } from "@now/node";
+import { Message } from "node-telegram-bot-api";
 
 const { BOT_NAME, TELEGRAM_TOKEN, TRACE_MOE_KEY, ANILIST_API_URL } = process.env;
 
 const TELEGRAM_API = "https://api.telegram.org";
 
-const sendMessage = (chat_id, text, options) =>
+const sendMessage = (chat_id, text, options?) =>
   fetch(`${TELEGRAM_API}/bot${TELEGRAM_TOKEN}/sendMessage`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -24,7 +25,7 @@ const sendChatAction = (chat_id, action) =>
     .then((e) => e.json())
     .then((e) => e.result);
 
-const sendVideo = (chat_id, video, options) =>
+const sendVideo = (chat_id, video, options?) =>
   fetch(`${TELEGRAM_API}/bot${TELEGRAM_TOKEN}/sendVideo`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -44,14 +45,10 @@ const editMessageText = (text, options) =>
 
 const formatTime = (timeInSeconds) => {
   const sec_num = Number(timeInSeconds);
-  const hours = Math.floor(sec_num / 3600)
-    .toString()
-    .padStart(2, "0");
-  const minutes = Math.floor((sec_num - hours * 3600) / 60)
-    .toString()
-    .padStart(2, "0");
+  const hours = Math.floor(sec_num / 3600);
+  const minutes = Math.floor((sec_num - hours * 3600) / 60);
   const seconds = (sec_num - hours * 3600 - minutes * 60).toFixed(0).padStart(2, "0");
-  return `${hours}:${minutes}:${seconds}`;
+  return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds}`;
 };
 
 const getAnilistInfo = (id) =>
@@ -216,7 +213,7 @@ const privateMessageHandler = async (message) => {
     reply_to_message_id: responding_msg.message_id,
   });
 
-  const result = await submitSearch(imageURL, responding_msg, message);
+  const result = await submitSearch(imageURL, responding_msg);
   // better to send responses one-by-one
   await editMessageText(result.text, {
     chat_id: bot_message.chat.id,
@@ -250,7 +247,7 @@ const groupMessageHandler = async (message) => {
     return;
   }
 
-  const result = await submitSearch(imageURL, responding_msg, message);
+  const result = await submitSearch(imageURL, responding_msg);
   if (result.isAdult) {
     await sendMessage(
       message.chat.id,
@@ -283,7 +280,7 @@ module.exports = async (req: NowRequest, res: NowResponse) => {
   if (req.method !== "POST") {
     return res.status(200).send("ok");
   }
-  const message = req.body?.message;
+  const message: Message = req.body?.message;
   if (message?.chat?.type === "private") {
     await privateMessageHandler(message);
   } else if (message?.chat?.type === "group" || message?.chat?.type === "supergroup") {
