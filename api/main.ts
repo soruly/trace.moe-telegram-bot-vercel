@@ -317,6 +317,13 @@ module.exports = async (req: NowRequest, res: NowResponse) => {
         }).then((e) => e.json())
       );
     }
+    if (req.query.me) {
+      return res.send(
+        await fetch("https://api.trace.moe/me", {
+          headers: { "x-trace-key": TRACE_MOE_KEY },
+        }).then((e) => e.json())
+      );
+    }
   }
   if (req.method !== "POST") {
     return res.send("ok");
