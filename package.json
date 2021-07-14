@@ -2,11 +2,11 @@
   "name": "trace.moe-telegram-bot-vercel",
   "version": "1.0.0",
   "description": "",
-  "main": "main.js",
+  "main": "main.ts",
   "scripts": {
-    "format": "prettier --write \"**/*.js\"",
-    "lint": "prettier --check \"**/*.js\"",
-    "test": "prettier --check \"**/*.js\""
+    "format": "prettier --write \"**/*.ts\"",
+    "lint": "prettier --check \"**/*.ts\"",
+    "test": "prettier --check \"**/*.ts\""
   },
   "repository": {
     "type": "git",
