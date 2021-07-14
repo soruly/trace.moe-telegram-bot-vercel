@@ -85,7 +85,26 @@ const getAnilistInfo = (id) =>
     return resolve((await response.json()).data.Media);
   });
 
-const submitSearch = (imageFileURL, message) =>
+interface AnilistInfo {
+  title?: {
+    chinese?: string;
+    english?: string;
+    native?: string;
+    romaji?: string;
+  };
+  isAdult?: boolean;
+}
+
+interface SearchResult {
+  text: string;
+  video?: string;
+  isAdult?: boolean;
+}
+
+const submitSearch: { (imageFileURL: string, message: Message): Promise<SearchResult> } = (
+  imageFileURL,
+  message
+) =>
   new Promise(async (resolve, reject) => {
     const response = await fetch(
       `https://api.trace.moe/search?${[
@@ -123,9 +142,8 @@ const submitSearch = (imageFileURL, message) =>
       return resolve({ text: "Cannot find any results from trace.moe" });
     }
     const { anilist, similarity, filename, from, to, video } = searchResult.result[0];
-    const { title: { chinese, english, native, romaji } = {}, isAdult } = await getAnilistInfo(
-      anilist
-    );
+    const { title: { chinese, english, native, romaji } = {}, isAdult }: AnilistInfo =
+      await getAnilistInfo(anilist);
     let text = "";
     text += [native, chinese, romaji, english]
       .filter((e) => e)
@@ -283,12 +301,25 @@ const groupMessageHandler = async (message) => {
 };
 
 module.exports = async (req: NowRequest, res: NowResponse) => {
+  if (req.method === "GET") {
+    if (req.query.setWebhook) {
+      return res.send(
+        await fetch(
+          `${TELEGRAM_API}/bot${TELEGRAM_TOKEN}/setWebhook?url=https://${VERCEL_URL}/api/main&max_connections=100`,
+          { method: "GET" }
+        ).then((e) => e.json())
+      );
+    }
+    if (req.query.getWebhookInfo) {
+      return res.send(
+        await fetch(`${TELEGRAM_API}/bot${TELEGRAM_TOKEN}/getWebhookInfo`, {
+          method: "GET",
+        }).then((e) => e.json())
+      );
+    }
+  }
   if (req.method !== "POST") {
-    const r = await fetch(
-      `${TELEGRAM_API}/bot${TELEGRAM_TOKEN}/setWebhook?url=https://${VERCEL_URL}/api/main&max_connections=100`,
-      { method: "GET" }
-    ).then((e) => e.json());
-    return res.status(200).send(r);
+    return res.send("ok");
   }
   const message: Message = req.body?.message;
   if (message?.chat?.type === "private") {
