@@ -285,7 +285,7 @@ const groupMessageHandler = async (message) => {
 module.exports = async (req: NowRequest, res: NowResponse) => {
   if (req.method !== "POST") {
     const r = await fetch(
-      `${TELEGRAM_API}/bot${TELEGRAM_TOKEN}/setWebhook?url=${VERCEL_URL}/api/main&max_connections=100`,
+      `${TELEGRAM_API}/bot${TELEGRAM_TOKEN}/setWebhook?url=https://${VERCEL_URL}/api/main&max_connections=100`,
       { method: "GET" }
     ).then((e) => e.json());
     return res.status(200).send(r);
